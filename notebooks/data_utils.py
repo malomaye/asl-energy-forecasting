@@ -55,17 +55,24 @@ def train_test_validation_split(df, label_column='total_consumption', recent_win
     holidays_df = get_prediction_window_columns(df, 'holiday', prediction_window)
     min_temp_df = get_prediction_window_columns(df, 'min_temp', prediction_window)
     max_temp_df = get_prediction_window_columns(df, 'max_temp', prediction_window)
+    date_df_max_min_holidays = get_prediction_window_columns(df, 'start_time', prediction_window)
     
     # historical features
     recent_df = get_historical_window_features(df, label_column, 
         start_days_ago=recent_window+lag_size, end_days_ago=lag_size)
     prior_year_df = get_historical_window_features(df, label_column, 
-        start_days_ago=365, end_days_ago=365-prediction_window)
+        start_days_ago=52*7, end_days_ago=52*7-prediction_window)
+    
+    recent_dates_df = get_historical_window_features(df, 'start_time', 
+        start_days_ago=recent_window+lag_size, end_days_ago=lag_size)
+    prior_year_dates_df = get_historical_window_features(df, 'start_time', 
+        start_days_ago=52*7, end_days_ago=52*7-prediction_window)
     
     # labels
     labels_df = get_prediction_window_columns(df, label_column, prediction_window)
     
-    final_dfs = [base_df, day_of_year_features_df, min_temp_df, max_temp_df, 
+    final_dfs = [base_df, date_df_max_min_holidays, recent_dates_df, prior_year_dates_df,
+                 day_of_year_features_df, min_temp_df, max_temp_df, 
                  holidays_df, recent_df, prior_year_df, labels_df]
     final_df = pd.concat(final_dfs, axis=1)
     final_df['day_of_prediction'] =  final_df['prediction_window_T0'].dt.normalize() - datetime.timedelta(days=lag_size)
