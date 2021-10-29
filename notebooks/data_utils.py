@@ -93,3 +93,73 @@ def train_test_validation_split(df, label_column='total_consumption', recent_win
     assert len(set(validate.index).intersection(set(test.index))) == 0
     
     return train, validate, test
+
+
+def get_column_input_dict(df, label_len=28):
+    
+    CSV_COLUMNS = []
+    LABEL_COLUMNS = []
+    STRING_COLS = []
+    NUMERIC_COLS = []
+    DEFAULTS = []
+    EXCLUSION_COLS = []
+    
+    for col in df.columns:
+        CSV_COLUMNS.append(col)
+        
+        # static columns 
+        if col in ['user_id', 'day_pod']:
+            STRING_COLS.append(col)
+            DEFAULTS.append(['na'])
+            
+        # exclusion columns 
+        elif col in ['prediction_window_T0', 'day_of_prediction']:
+            EXCLUSION_COLS.append(col)
+        elif col.startswith('start_time_T'):
+            EXCLUSION_COLS.append(col)
+        elif col.startswith('start_time_T_minus_'):
+            EXCLUSION_COLS.append(col)
+            
+        # day of year columns
+        elif col.startswith('day_of_year_sin_T'):
+            NUMERIC_COLS.append(col)
+            DEFAULTS.append([0.0])
+        elif col.startswith('day_of_year_cos_T'):
+            NUMERIC_COLS.append(col)
+            DEFAULTS.append([0.0])
+            
+        # temperature columns
+        elif col.startswith('min_temp_T'):
+            NUMERIC_COLS.append(col)
+            DEFAULTS.append([0.0])
+        elif col.startswith('max_temp_T'):
+            NUMERIC_COLS.append(col)
+            DEFAULTS.append([0.0])
+        
+        # holiday columns 
+        elif col.startswith('holiday_T'):
+            STRING_COLS.append(col)
+            DEFAULTS.append(['no holiday'])
+            
+        # historical consumption columns 
+        elif col.startswith('total_consumption_T_minus_'):
+            NUMERIC_COLS.append(col)
+            DEFAULTS.append([0.0])
+        
+        # label columns
+        elif col.startswith('total_consumption_T'):
+            LABEL_COLUMNS.append(col)
+        else:
+            assert 1 == 2, f'UNKNOW COLUMN: {col}'
+        
+    assert len(LABEL_COLUMNS) == 28, 'INCORRECT LABEL COLUMN SHAPE'
+    
+    return {
+        'CSV_COLUMNS': CSV_COLUMNS,
+        'LABEL_COLUMNS': LABEL_COLUMNS,
+        'STRING_COLS': STRING_COLS,
+        'NUMERIC_COLS': NUMERIC_COLS,
+        'DEFAULTS': DEFAULTS,
+        'EXCLUSION_COLS': EXCLUSION_COLS,
+    }
+        
