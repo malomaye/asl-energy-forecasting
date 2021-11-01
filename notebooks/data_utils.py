@@ -108,9 +108,12 @@ def get_column_input_dict(df, label_len=28):
         CSV_COLUMNS.append(col)
         
         # static columns 
-        if col in ['user_id', 'day_pod']:
+        if col == 'user_id':
             STRING_COLS.append(col)
             DEFAULTS.append(['na'])
+        elif col == 'day_pod':
+            NUMERIC_COLS.append(col)
+            DEFAULTS.append([0.0])
             
         # exclusion columns 
         elif col in ['prediction_window_T0', 'day_of_prediction']:
